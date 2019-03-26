@@ -1,0 +1,17 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": ["es6"],
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "strict": false,
+    "newLine": "LF",
+    "rootDir": "./src",
+    "outDir": "./build"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
