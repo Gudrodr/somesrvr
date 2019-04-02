@@ -4,23 +4,21 @@ mongoose.set('useNewUrlParser', true);
 mongoose.connect('mongodb://localhost:27017/articles');
 
 export interface ArticleUnit extends mongoose.Document {
+    tags: string;
+    date: string;
+    author: string;
     title: string;
     alias: string;
     body: string;
-    assets?: {
-        title: string;
-        link: string;
-    }[];
 }
 
 const articleSchema: mongoose.Schema = new mongoose.Schema({
+    tags: String,
+    date: String,
+    author: String,
     title: String,
     alias: String,
     body: String,
-    assets: {
-        title: String,
-        link: String
-    }
 });
 
 const Article: mongoose.Model<ArticleUnit> = mongoose.model('Article', articleSchema, 'articles');

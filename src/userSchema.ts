@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import * as crypto from 'crypto';
 
-mongoose.set('debug', true);
+// mongoose.set('debug', true);
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);

@@ -12,11 +12,11 @@ import Article from './articlesSchema';
 const app = new Koa();
 const router = new Router();
 
-app.use(router.routes());
-app.use(router.allowedMethods());
+app.use(cors());
 app.use(bodyParser());
 app.use(passport.initialize());
-app.use(cors());
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 const jwtSecret = 'someSecretWords';
 
@@ -28,7 +28,7 @@ passport.use(
       session: false
     },
     (email: string, password: string, done) => {
-      User.findOne({ email }, (err, user) => {
+      User.findOne({email}, (err, user) => {
         if (err) {
           return done(err);
         }
@@ -67,7 +67,7 @@ router.get('/', async (ctx, next) => {
       if (err) {
         throw err;
       }
-      let articles = [];
+      const articles = [];
       result.forEach(item => articles.push(item));
       ctx.body = {articles};
     });
@@ -93,47 +93,65 @@ router.get('article', '/article/:alias', async (ctx, next) => {
   await next();
 });
 
-app.use(async (ctx, next) => {
-  if (ctx.request.method === 'POST' && ctx.request.url === '/user') {
-    try {
-      ctx.body = await User.create(ctx.request.body);
-    } catch (err) {
-      ctx.status = 400;
-      ctx.body = err;
-    }
+router.post('/write', async (ctx, next) => {
+  console.log(ctx.request.body);
+  try {
+    await Article.create({
+      tags: ctx.request.body.tags,
+      date: ctx.request.body.date,
+      author: ctx.request.body.author,
+      title: ctx.request.body.title,
+      alias: ctx.request.body.alias, 
+      body: ctx.request.body.body
+    }, (err, article) => {
+      if (err) {
+        throw err;
+      }
+      ctx.status = 200;
+      ctx.body = [];
+    });
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = err;
   }
   await next();
 });
 
-app.use(async (ctx, next) => {
-  if (ctx.request.method === 'POST' && ctx.request.url === '/login') {
-    await passport.authenticate('local', (err, user) => {
-      if (user === false) {
-        ctx.body = 'Login failed';
-      } else {
-        const payload = {
-          id: user.id,
-          userName: user.userName,
-          email: user.email
-        };
-        const token = jwt.sign(payload, jwtSecret);
-
-        ctx.body = { user: user.userName, token };
-      }
-    })(ctx, next);
+router.post('/user', async (ctx, next) => {
+  try {
+    ctx.body = await User.create(ctx.request.body);
+  } catch (err) {
+    ctx.status = 400;
+    ctx.body = err;
   }
+  await next();
 });
 
-app.use(async (ctx, next) => {
-    if (ctx.request.method === 'GET' && ctx.request.url === '/custom') {
-        await passport.authenticate('jwt', (err, user) => {
-            if (user) {
-              ctx.body = `Hello ${user.userName}`;
-            } else {
-              ctx.body = 'No such user';
-            }
-        })(ctx, next);
+router.post('/login', async (ctx, next) => {
+  await passport.authenticate('local', (err, user) => {
+    if (user === false) {
+      ctx.body = 'Login failed';
+    } else {
+      const payload = {
+        id: user.id,
+        userName: user.userName,
+        email: user.email
+      };
+      const token = jwt.sign(payload, jwtSecret);
+
+      ctx.body = { user: user.userName, token };
     }
+  })(ctx, next);
+});
+
+router.get('/custom', async (ctx, next) => {
+  await passport.authenticate('jwt', (err, user) => {
+    if (user) {
+      ctx.body = `Hello ${user.userName}`;
+    } else {
+      ctx.body = 'No such user';
+    }
+  })(ctx, next);
 });
 
 app.listen(3001);
