@@ -63,7 +63,7 @@ passport.use(
 
 router.get('/', async (ctx, next) => {
   try {
-    await Article.find({}, {alias: 1, title: 1, _id: 0}, (err, result) => {
+    await Article.find({}, {alias: 1, title: 1, date: 1, tags: 1, _id: 0}, (err, result) => {
       if (err) {
         throw err;
       }
@@ -94,7 +94,6 @@ router.get('article', '/article/:alias', async (ctx, next) => {
 });
 
 router.post('/write', async (ctx, next) => {
-  console.log(ctx.request.body);
   try {
     await Article.create({
       tags: ctx.request.body.tags,
