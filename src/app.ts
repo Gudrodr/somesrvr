@@ -27,7 +27,7 @@ passport.use(
       passwordField: 'password',
       session: false
     },
-    (email: string, password: string, done) => {
+    function (email: string, password: string, done) {
       User.findOne({email}, (err, user) => {
         if (err) {
           return done(err);
@@ -42,12 +42,11 @@ passport.use(
 );
 
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('jwt'),
+  jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('JWT'),
   secretOrKey: jwtSecret
 };
 
-passport.use(
-  new Strategy(jwtOptions, (payload: any, done) => {
+passport.use('jwt', new Strategy(jwtOptions, function (payload: any, done) {
     User.findById(payload.id, (err, user) => {
       if (err) {
         return done(err);
@@ -144,11 +143,19 @@ router.post('/login', async (ctx, next) => {
 });
 
 router.get('/custom', async (ctx, next) => {
-  await passport.authenticate('jwt', (err, user) => {
-    if (user) {
-      ctx.body = `Hello ${user.userName}`;
-    } else {
-      ctx.body = 'No such user';
+  await passport.authenticate('jwt', {session: false}, (err, user) => {
+    try {
+      if (err) {
+        throw err;
+      }
+      if (user) {
+        ctx.body = `Hello ${user.userName}`;
+      } else {
+        ctx.body = 'No such user';
+      }
+    } catch (err) {
+      ctx.status = 500;
+      ctx.body = err;
     }
   })(ctx, next);
 });
