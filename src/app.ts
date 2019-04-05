@@ -135,7 +135,7 @@ router.post('/login', async (ctx, next) => {
         userName: user.userName,
         email: user.email
       };
-      const token = jwt.sign(payload, jwtSecret);
+      const token = jwt.sign(payload, jwtSecret, {expiresIn: '24h'});
 
       ctx.body = {user: user.userName, token};
     }
