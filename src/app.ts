@@ -42,7 +42,7 @@ passport.use(
 );
 
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('JWT'),
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: jwtSecret
 };
 
@@ -115,20 +115,20 @@ router.post('/write', async (ctx, next) => {
   await next();
 });
 
-router.post('/user', async (ctx, next) => {
-  try {
-    ctx.body = await User.create(ctx.request.body);
-  } catch (err) {
-    ctx.status = 400;
-    ctx.body = err;
-  }
-  await next();
-});
+// router.post('/user', async (ctx, next) => {
+//   try {
+//     ctx.body = await User.create(ctx.request.body);
+//   } catch (err) {
+//     ctx.status = 400;
+//     ctx.body = err;
+//   }
+//   await next();
+// });
 
 router.post('/login', async (ctx, next) => {
   await passport.authenticate('local', (err, user) => {
     if (user === false) {
-      ctx.body = 'Login failed';
+      ctx.body = {user: false};
     } else {
       const payload = {
         id: user.id,
@@ -137,21 +137,21 @@ router.post('/login', async (ctx, next) => {
       };
       const token = jwt.sign(payload, jwtSecret);
 
-      ctx.body = { user: user.userName, token };
+      ctx.body = {user: user.userName, token};
     }
   })(ctx, next);
 });
 
-router.get('/custom', async (ctx, next) => {
-  await passport.authenticate('jwt', {session: false}, (err, user) => {
+router.get('/user_check', async (ctx, next) => {
+  await passport.authenticate('jwt', (err, user) => {
     try {
       if (err) {
         throw err;
       }
       if (user) {
-        ctx.body = `Hello ${user.userName}`;
+        ctx.body = {success: true};
       } else {
-        ctx.body = 'No such user';
+        ctx.body = {success: false};
       }
     } catch (err) {
       ctx.status = 500;
