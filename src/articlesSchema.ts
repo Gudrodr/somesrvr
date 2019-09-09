@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 
 mongoose.set('useNewUrlParser', true);
-mongoose.connect('mongodb://localhost:27017/articles');
+mongoose.connect('mongodb://mongodatabase:27017/articles');
 
 export interface ArticleUnit extends mongoose.Document {
     tags: string;

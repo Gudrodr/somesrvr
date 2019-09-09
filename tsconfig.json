@@ -8,7 +8,6 @@
     "experimentalDecorators": true,
     "strict": false,
     "newLine": "LF",
-    "rootDir": "./src",
     "outDir": "./build"
   },
   "exclude": [
